@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/icons">
+        <file>rect.png</file>
+        <file>boarder.png</file>
+    </qresource>
+</RCC>
