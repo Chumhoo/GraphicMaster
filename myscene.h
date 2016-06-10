@@ -16,7 +16,7 @@
 
 #include "myitem.h"
 
-enum MOUSEMODE{DRAG, RECTANGLE, ELLIPSE};
+enum MOUSEMODE{DRAG, RECTANGLE, ELLIPSE, LINE};
 
 class MyScene : public QGraphicsScene
 {
@@ -29,8 +29,10 @@ protected:
     void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
 private:
     bool pressing = false;
-    MOUSEMODE mouseMode = DRAG;
-    MyItem *graph;
+    MOUSEMODE mouseMode = LINE;
+    MyRectItem *rectangle;
+    MyEllipseItem *ellipse;
+    MyLineItem *line;
 };
 
 #endif // MYSCENE_H

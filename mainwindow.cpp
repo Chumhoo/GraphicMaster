@@ -11,11 +11,6 @@ MainWindow::MainWindow(QWidget *parent) :
     scene = new MyScene;//场景
     scene->setSceneRect(-200, -150, 400, 300);
 
-    for(int i = 0; i < 5; ++i) {
-        MyRectItem *item = new MyRectItem;
-        item->setRect(i*100, 0, 50, 50);
-        scene->addItem(item);
-    }
 
 //    view = new MyView;
 //    view->setScene(scene);
@@ -37,32 +32,51 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_DragBtn_clicked()
 {
-    scene->changeMouseMode(DRAG);
-    ui->SquareBtn->setChecked(false);
-    ui->DragBtn->setChecked(false);
-    ui->EllipseButton->setChecked(false);
-
-    ui->DragBtn->setChecked(true);
-
+   changeMouseMode(DRAG);
 }
 
 void MainWindow::on_SquareBtn_clicked()
 {
-    scene->changeMouseMode(RECTANGLE);
-    ui->SquareBtn->setChecked(false);
-    ui->DragBtn->setChecked(false);
-    ui->EllipseButton->setChecked(false);
-
-    ui->SquareBtn->setChecked(true);
+    changeMouseMode(RECTANGLE);
 }
 
 void MainWindow::on_EllipseButton_clicked()
 {
-    scene->changeMouseMode(ELLIPSE);
-    ui->SquareBtn->setChecked(false);
-    ui->DragBtn->setChecked(false);
-    ui->EllipseButton->setChecked(false);
+    changeMouseMode(ELLIPSE);
+}
 
-    ui->EllipseButton->setChecked(true);
+void MainWindow::keyPressEvent(QKeyEvent *event)
+{
+    if (event->key() == Qt::Key_Escape)
+    {
+        changeMouseMode(DRAG);
+    }
+}
 
+void MainWindow::changeMouseMode(MOUSEMODE newMouseMode)
+{
+    if (newMouseMode == DRAG)
+    {
+        scene->changeMouseMode(DRAG);
+        ui->SquareBtn->setChecked(false);
+        ui->DragBtn->setChecked(false);
+        ui->EllipseButton->setChecked(false);
+        ui->DragBtn->setChecked(true);
+    }
+    else if (newMouseMode == RECTANGLE)
+    {
+        scene->changeMouseMode(RECTANGLE);
+        ui->SquareBtn->setChecked(false);
+        ui->DragBtn->setChecked(false);
+        ui->EllipseButton->setChecked(false);
+        ui->SquareBtn->setChecked(true);
+    }
+    else if (newMouseMode == ELLIPSE)
+    {
+        scene->changeMouseMode(ELLIPSE);
+        ui->SquareBtn->setChecked(false);
+        ui->DragBtn->setChecked(false);
+        ui->EllipseButton->setChecked(false);
+        ui->EllipseButton->setChecked(true);
+    }
 }

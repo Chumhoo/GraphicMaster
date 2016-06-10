@@ -16,10 +16,10 @@ public:
     MyItem();
     QRectF boundingRect() const;
     virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
-                  QWidget *widget);
+                  QWidget *widget) = 0;
     virtual void drawBoarder(QPainter *painter);
     void setColor(const QColor &brushColor) { fillColor = brushColor; }
-
+    void setBoundingRect(QRectF newRect);
 protected:
     void mousePressEvent(QGraphicsSceneMouseEvent *event);
     void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
@@ -30,6 +30,7 @@ protected:
 
     QColor lineColor, fillColor;
 private:
+    QRectF rect;
     bool hovering = false;
     QPoint start, end;
     enum resizeDirection{EMPTY, LEFT, RIGHT, UP, DOWN, LEFTTOP, RIGHTTOP, LEFTBOTTOM, RIGHTBOTTOM};
@@ -48,6 +49,17 @@ class MyEllipseItem : public MyItem
 public:
     virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
                   QWidget *widget);
+};
+
+class MyLineItem : public MyItem
+{
+public:
+    void setLineStart(QPoint point);
+    void setLineEnd(QPoint point);
+    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
+                  QWidget *widget);
+private:
+    QPoint startPoint, endPoint;
 };
 
 #endif // MYITEM_H
