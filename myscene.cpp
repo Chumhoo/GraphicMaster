@@ -17,13 +17,18 @@ void MyScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 
     if (mouseMode == RECTANGLE)
     {
-        graph = new MyRectItem();
-        this->addItem(graph);
+        rectangle = new MyRectItem();
+        this->addItem(rectangle);
     }
     else if (mouseMode == ELLIPSE)
     {
-        graph = new MyEllipseItem();
-        this->addItem(graph);
+        ellipse = new MyEllipseItem();
+        this->addItem(ellipse);
+    }
+    else if (mouseMode == LINE)
+    {
+        line = new MyLineItem();
+        this->addItem(line);
     }
     else if (mouseMode == DRAG) QGraphicsScene::mousePressEvent(event);    //传递事件给Item！
 }
@@ -32,14 +37,28 @@ void MyScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
     if (pressing)
     {
-        if (mouseMode != DRAG)
+        if (mouseMode == RECTANGLE || mouseMode == ELLIPSE)
         {
             QRectF newRect(event->buttonDownScenePos(Qt::LeftButton).x(),
                            event->buttonDownScenePos(Qt::LeftButton).y(),
                            event->scenePos().x() - event->buttonDownScenePos(Qt::LeftButton).x(),
                            event->scenePos().y() - event->buttonDownScenePos(Qt::LeftButton).y());
             newRect = newRect.normalized();       //解决长宽为负的问题
-            graph->setRect(newRect);
+            if (mouseMode == RECTANGLE) rectangle->setBoundingRect(newRect);
+            else if (mouseMode == ELLIPSE) ellipse->setBoundingRect(newRect);
+
+        }
+        else if(mouseMode == LINE)
+        {
+            QRectF newRect(event->buttonDownScenePos(Qt::LeftButton).x(),
+                           event->buttonDownScenePos(Qt::LeftButton).y(),
+                           event->scenePos().x() - event->buttonDownScenePos(Qt::LeftButton).x(),
+                           event->scenePos().y() - event->buttonDownScenePos(Qt::LeftButton).y());
+            newRect = newRect.normalized();       //解决长宽为负的问题
+            line->setBoundingRect(newRect);
+            line->setLineStart(QPoint(event->buttonDownScenePos(Qt::LeftButton).x(),
+                                       event->buttonDownScenePos(Qt::LeftButton).y()));
+            line->setLineEnd(QPoint(event->scenePos().x(), event->scenePos().y()));
         }
     }
     if (mouseMode == DRAG) QGraphicsScene::mouseMoveEvent(event);    //传递事件给Item！
