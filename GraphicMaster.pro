@@ -16,14 +16,17 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     myitem.cpp \
     myscene.cpp \
-    myview.cpp
+    myview.cpp \
+    newdialog.cpp
 
 HEADERS  += mainwindow.h \
     myitem.h \
     myscene.h \
-    myview.h
+    myview.h \
+    newdialog.h
 
-FORMS    += mainwindow.ui
+FORMS    += mainwindow.ui \
+    newdialog.ui
 
 RESOURCES += \
     icons.qrc

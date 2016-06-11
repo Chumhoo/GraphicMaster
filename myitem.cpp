@@ -11,6 +11,7 @@ MyItem::MyItem(QBrush newBrush, QPen newPen) : brush(newBrush), pen(newPen)
     setFlag(QGraphicsItem::ItemIsMovable);
     setAcceptHoverEvents(true);
 
+    selectColor = QColor(qrand() % 256, qrand() % 256, qrand() % 256);
     rect = rect.normalized();
 }
 
@@ -53,7 +54,7 @@ void MyItem::drawBoarder(QPainter *painter)
         //        QPixmap pix;
         //        pix.load(":/icons/boarder.png");
         //        painter->drawPixmap(boundingRect().left(), boundingRect().top(), boundingRect().width(), boundingRect().height(), pix);
-        painter->setPen(QPen(QColor(qrand() % 256, qrand() % 256, qrand() % 256), 2, Qt::DashLine));
+        painter->setPen(QPen(selectColor, 2, Qt::DashLine));
         painter->setBrush(QColor(0, 0, 255, 10));
         painter->drawRect(boundingRect().x(), boundingRect().y(), boundingRect().width(), boundingRect().height());
 
@@ -80,8 +81,6 @@ void MyItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
 
 void MyItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
-    if (event->button() == Qt::LeftButton)
-    {
         if (resizeDir == EMPTY)
         {
             setFlag(ItemIsMovable, true);
@@ -142,7 +141,6 @@ void MyItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
                 setBoundingRect(rect);
             }
         }
-    }
     QGraphicsItem::mouseMoveEvent(event);
 }
 

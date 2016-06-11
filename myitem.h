@@ -36,6 +36,7 @@ protected:
     void hoverMoveEvent(QGraphicsSceneHoverEvent *event);
     void hoverLeaveEvent(QGraphicsSceneHoverEvent *event);
 
+    QColor selectColor;
     QRectF rect;
     QBrush brush;
     QPen pen;

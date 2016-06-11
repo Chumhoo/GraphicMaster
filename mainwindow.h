@@ -3,7 +3,9 @@
 
 #include <QMainWindow>
 #include <QColorDialog>
+#include <QFileDialog>
 #include <QMessageBox>
+#include <QImage>
 #include "myitem.h"
 #include "myscene.h"
 #include "myview.h"
@@ -34,9 +36,7 @@ private slots:
     void on_textButton_clicked();
     void on_pencilButton_clicked();
     void on_scaleButton_clicked();
-
-    void mousePressEvent(QMouseEvent *event);
-    void mouseMoveEvent(QMouseEvent *event);
+    void wheelEvent(QWheelEvent *event);
     void on_BrushColorButton_2_clicked();
 
     void on_PenColorButton_clicked();
@@ -62,6 +62,18 @@ private slots:
     void on_moveToTop_clicked();
 
     void on_moveToBottom_clicked();
+
+    void on_actionNew_triggered();
+
+    void on_actionAbout_triggered();
+
+    void on_actionInput_triggered();
+
+    void on_actionPng_triggered();
+
+    void on_actionJpg_triggered();
+
+    void on_actionHif_triggered();
 
 private:
     void updateBrushPreview();
