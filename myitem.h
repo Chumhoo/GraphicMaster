@@ -8,59 +8,125 @@
 #include <QWidget>
 #include <QVariant>
 #include <QColor>
+#include <QMenu>
+
+
+enum resizeDirection{EMPTY, LEFT, RIGHT, UP, DOWN, LEFTTOP, RIGHTTOP, LEFTBOTTOM, RIGHTBOTTOM};
 
 
 class MyItem : public QGraphicsItem
 {
 public:
-    MyItem();
+    MyItem(QBrush newBrush, QPen newPen);
     QRectF boundingRect() const;
     virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
-                  QWidget *widget) = 0;
+                       QWidget *widget);
     virtual void drawBoarder(QPainter *painter);
-    void setColor(const QColor &brushColor) { fillColor = brushColor; }
+    void setBrush(const QBrush newBrush);
+    void setPen(const QPen newPen);
     void setBoundingRect(QRectF newRect);
+
+    resizeDirection resizeDir = EMPTY;
+    virtual ~MyItem() {}
+
 protected:
     void mousePressEvent(QGraphicsSceneMouseEvent *event);
     void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
-
     void hoverEnterEvent(QGraphicsSceneHoverEvent *event);
     void hoverMoveEvent(QGraphicsSceneHoverEvent *event);
     void hoverLeaveEvent(QGraphicsSceneHoverEvent *event);
 
-    QColor lineColor, fillColor;
-private:
     QRectF rect;
+    QBrush brush;
+    QPen pen;
+
+private:
     bool hovering = false;
-    QPoint start, end;
-    enum resizeDirection{EMPTY, LEFT, RIGHT, UP, DOWN, LEFTTOP, RIGHTTOP, LEFTBOTTOM, RIGHTBOTTOM};
-    resizeDirection resizeDir = EMPTY;
 };
 
 class MyRectItem : public MyItem
 {
 public:
+    MyRectItem(QBrush newBrush, QPen newPen) : MyItem(newBrush, newPen){}
     virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
-                  QWidget *widget);
+                       QWidget *widget);
+private:
+    ~MyRectItem(){}
 };
 
 class MyEllipseItem : public MyItem
 {
 public:
+    MyEllipseItem(QBrush newBrush, QPen newPen) : MyItem(newBrush, newPen){}
     virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
-                  QWidget *widget);
+                       QWidget *widget);
+private:
+    ~MyEllipseItem(){}
+};
+
+class MyRoundRectItem : public MyItem
+{
+public:
+    MyRoundRectItem(QBrush newBrush, QPen newPen) : MyItem(newBrush, newPen){}
+    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
+                       QWidget *widget);
+private:
+    ~MyRoundRectItem(){}
+};
+
+class MyPencilItem : public MyItem
+{
+public:
+    MyPencilItem(QBrush newBrush, QPen newPen) : MyItem(newBrush, newPen){}
+    QRectF boundingRect() const;
+    void setStart(QPointF point);
+    void addPoint(QPointF point);
+    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
+                       QWidget *widget);
+private:
+    QPainterPath path;
+    ~MyPencilItem(){}
+};
+
+class MyPolygonItem : public MyItem
+{
+public:
+    MyPolygonItem(QBrush newBrush, QPen newPen) : MyItem(newBrush, newPen){}
+    bool drawing = false;
+    QRectF boundingRect() const;
+    void addPoint(QPointF point);
+    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
+                       QWidget *widget);
+private:
+    QPolygonF polygon;
+    ~MyPolygonItem(){}
 };
 
 class MyLineItem : public MyItem
 {
 public:
-    void setLineStart(QPoint point);
-    void setLineEnd(QPoint point);
+    MyLineItem(QBrush newBrush, QPen newPen) : MyItem(newBrush, newPen){}
+    void setLine(QPointF startP, QPointF endP);
     virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
-                  QWidget *widget);
+                       QWidget *widget);
 private:
-    QPoint startPoint, endPoint;
+    QPointF start, end;
+    ~MyLineItem(){}
 };
+
+class MyTextItem : public QGraphicsTextItem
+{
+public:
+    MyTextItem(QFont font, QColor textColor);
+protected:
+    void keyPressEvent(QKeyEvent *event);
+    void mousePressEvent(QGraphicsSceneMouseEvent *event);
+    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event);
+    void focusOutEvent(QFocusEvent *event);
+private:
+    ~MyTextItem(){}
+};
+
 
 #endif // MYITEM_H
 

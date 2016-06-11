@@ -1,17 +1,17 @@
 #include "myitem.h"
 #include <QVariant>
 
-MyItem::MyItem()
+MyItem::MyItem(QBrush newBrush, QPen newPen) : brush(newBrush), pen(newPen)
 {
     clearFocus();
     setAcceptDrops(true);  //设置接收拖放!!!
-    lineColor = QColor(Qt::lightGray);
-    fillColor = QColor(255, 255, 255, 200);
 
-    //setFlag(QGraphicsItem::ItemIsSelectable);  //添加本性质则可同时选择多项
+    setFlag(QGraphicsItem::ItemIsSelectable);  //添加本性质则可同时选择多项
     setFlag(QGraphicsItem::ItemIsFocusable);
     setFlag(QGraphicsItem::ItemIsMovable);
     setAcceptHoverEvents(true);
+
+    rect = rect.normalized();
 }
 
 QRectF MyItem::boundingRect() const
@@ -27,25 +27,37 @@ void MyItem::setBoundingRect(QRectF newRect)
     update(boundingRect());
 }
 
-void MyItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
-                       QWidget *widget)
+void MyItem::setBrush(const QBrush newBrush)
 {
-    painter->setPen(lineColor);
-    painter->setBrush(fillColor);
+    brush = newBrush;
+}
+
+void MyItem::setPen(const QPen newPen)
+{
+    pen = newPen;
+}
+
+void MyItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
+                   QWidget *widget)
+{
+    Q_UNUSED(option);
+    Q_UNUSED(widget);
+    painter->setPen(pen);
+    painter->setBrush(brush);
     drawBoarder(painter);
 }
 
 void MyItem::drawBoarder(QPainter *painter)
 {
-    if(hasFocus()) {
+    if(hasFocus() || isSelected()) {
         //        QPixmap pix;
         //        pix.load(":/icons/boarder.png");
         //        painter->drawPixmap(boundingRect().left(), boundingRect().top(), boundingRect().width(), boundingRect().height(), pix);
-        painter->setPen(QPen(QColor(255,0,0), 1, Qt::DashLine));
+        painter->setPen(QPen(QColor(qrand() % 256, qrand() % 256, qrand() % 256), 2, Qt::DashLine));
         painter->setBrush(QColor(0, 0, 255, 10));
         painter->drawRect(boundingRect().x(), boundingRect().y(), boundingRect().width(), boundingRect().height());
 
-        painter->setPen(QPen(QColor(0,0,0), 1, Qt::SolidLine));
+        painter->setPen(QPen(QColor(255, 255, 255), 1, Qt::SolidLine));
         painter->setBrush(QBrush(Qt::black));
         painter->drawRect(boundingRect().left(), boundingRect().top(), 4, 4);
         painter->drawRect(boundingRect().right() - 4, boundingRect().top(), 4, 4);
@@ -57,126 +69,87 @@ void MyItem::drawBoarder(QPainter *painter)
         painter->drawRect((boundingRect().left() + boundingRect().right())/2 - 2, boundingRect().bottom() - 4, 4, 4);
         painter->setBrush(QBrush(Qt::transparent));
     }
-    else {
-        painter->setPen(QPen(QColor(100,100,100), 1, Qt::SolidLine));
-    }
 }
 
 void MyItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
-    qDebug() << event->type();
     setFocus();
-    // QGraphicsItem::mousePressEvent(event);
+    QGraphicsItem::mousePressEvent(event);
 }
 
 
 void MyItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
-    qDebug() << event->scenePos().x() << event->scenePos().y() << boundingRect().x() << boundingRect().y();
+    if (event->button() == Qt::LeftButton)
+    {
+        if (resizeDir == EMPTY)
+        {
+            setFlag(ItemIsMovable, true);
+        }
+        else
+        {
+            setFlag(ItemIsMovable, false);
+            if (resizeDir == LEFT)
+            {
+                if (event->scenePos().x() < this->x() + rect.right()) rect.setLeft(event->scenePos().x() - this->x());
+                else resizeDir = RIGHT;
+                setBoundingRect(rect);
+            }
+            else if (resizeDir == RIGHT)
+            {
+                if (event->scenePos().x() > this->x() + rect.left()) rect.setRight(event->scenePos().x() - this->x());
+                else resizeDir = LEFT;
+                setBoundingRect(rect);
+            }
+            else if (resizeDir == UP)
+            {
+                if (event->scenePos().y() < this->y() + rect.bottom()) rect.setTop(event->scenePos().y() - this->y());
+                else resizeDir = DOWN;
+                setBoundingRect(rect);
+            }
+            else if (resizeDir == DOWN)
+            {
+                if (event->scenePos().y() > this->y() + rect.top()) rect.setBottom(event->scenePos().y() - this->y());
+                else resizeDir = UP;
+                setBoundingRect(rect);
+            }
+            else if (resizeDir == LEFTTOP)
+            {
+                if (event->scenePos().x() < this->x() + rect.right())
+                    rect.setTopLeft(QPointF(event->scenePos().x() - this->x(), event->scenePos().y() - this->y()));
+                else resizeDir = RIGHTBOTTOM;
+                setBoundingRect(rect);
+            }
+            else if (resizeDir == RIGHTBOTTOM)
+            {
+                if (event->scenePos().x() > this->x() + rect.left())
+                    rect.setBottomRight(QPointF(event->scenePos().x() - this->x(), event->scenePos().y() - this->y()));
+                else resizeDir = LEFTTOP;
+                setBoundingRect(rect);
+            }
+            else if (resizeDir == LEFTBOTTOM)
+            {
+                if (event->scenePos().x() < this->x() + rect.right())
+                    rect.setBottomLeft(QPointF(event->scenePos().x() - this->x(), event->scenePos().y() - this->y()));
+                else resizeDir = RIGHTTOP;
+                setBoundingRect(rect);
+            }
+            else // if (resizeDir == RIGHTTOP)
+            {
+                if (event->scenePos().x() > this->x() + rect.left())
+                    rect.setTopRight(QPointF(event->scenePos().x() - this->x(), event->scenePos().y() - this->y()));
+                else resizeDir = LEFTBOTTOM;
+                setBoundingRect(rect);
+            }
+        }
+    }
     QGraphicsItem::mouseMoveEvent(event);
-
-    if (resizeDir == EMPTY)
-    {
-        setFlag(ItemIsMovable, true);
-    }
-    else if (resizeDir == LEFT)
-    {
-        setFlag(ItemIsMovable, false);
-        QRectF newRect;
-        newRect = rect;
-        newRect = newRect.normalized();
-
-        if (event->scenePos().x() < this->x() + newRect.right()) newRect.setLeft(event->scenePos().x() - this->x());
-        else resizeDir = RIGHT;
-        setBoundingRect(newRect);
-    }
-    else if (resizeDir == RIGHT)
-    {
-        setFlag(ItemIsMovable, false);
-        QRectF newRect;
-        newRect = rect;
-        newRect = newRect.normalized();
-
-        if (event->scenePos().x() > this->x() + newRect.left()) newRect.setRight(event->scenePos().x() - this->x());
-        else resizeDir = LEFT;
-        setBoundingRect(newRect);
-    }
-    else if (resizeDir == UP)
-    {
-        setFlag(ItemIsMovable, false);
-        QRectF newRect;
-        newRect = rect;
-        newRect = newRect.normalized();
-
-        if (event->scenePos().y() < this->y() + newRect.bottom()) newRect.setTop(event->scenePos().y() - this->y());
-        else resizeDir = DOWN;
-        setBoundingRect(newRect);
-    }
-    else if (resizeDir == DOWN)
-    {
-        setFlag(ItemIsMovable, false);
-        QRectF newRect;
-        newRect = rect;
-        newRect = newRect.normalized();
-
-        if (event->scenePos().y() > this->y() + newRect.top()) newRect.setBottom(event->scenePos().y() - this->y());
-        else resizeDir = UP;
-        setBoundingRect(newRect);
-    }
-    else if (resizeDir == LEFTTOP)
-    {
-        setFlag(ItemIsMovable, false);
-        QRectF newRect;
-        newRect = rect;
-        newRect = newRect.normalized();
-
-        if (event->scenePos().x() < this->x() + newRect.right())
-            newRect.setTopLeft(QPoint(event->scenePos().x() - this->x(), event->scenePos().y() - this->y()));
-        else resizeDir = RIGHTBOTTOM;
-        setBoundingRect(newRect);
-    }
-    else if (resizeDir == RIGHTBOTTOM)
-    {
-        setFlag(ItemIsMovable, false);
-        QRectF newRect;
-        newRect = rect;
-        newRect = newRect.normalized();
-
-        if (event->scenePos().x() > this->x() + newRect.left())
-            newRect.setBottomRight(QPoint(event->scenePos().x() - this->x(), event->scenePos().y() - this->y()));
-        else resizeDir = LEFTTOP;
-        setBoundingRect(newRect);
-    }
-    else if (resizeDir == LEFTBOTTOM)
-    {
-        setFlag(ItemIsMovable, false);
-        QRectF newRect;
-        newRect = rect;
-        newRect = newRect.normalized();
-
-        if (event->scenePos().x() < this->x() + newRect.right())
-            newRect.setBottomLeft(QPoint(event->scenePos().x() - this->x(), event->scenePos().y() - this->y()));
-        else resizeDir = RIGHTTOP;
-        setBoundingRect(newRect);
-    }
-    else if (resizeDir == RIGHTTOP)
-    {
-        setFlag(ItemIsMovable, false);
-        QRectF newRect;
-        newRect = rect;
-        newRect = newRect.normalized();
-
-        if (event->scenePos().x() > this->x() + newRect.left())
-            newRect.setTopRight(QPoint(event->scenePos().x() - this->x(), event->scenePos().y() - this->y()));
-        else resizeDir = LEFTBOTTOM;
-        setBoundingRect(newRect);
-    }
 }
 
 void MyItem::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
 {
+    Q_UNUSED(event);
     hovering = true;
-
 }
 
 void MyItem::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
@@ -251,52 +224,180 @@ void MyItem::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
     //qDebug() << event->type();
     hovering = false;
     resizeDir = EMPTY;
-    //this->setPen(QColor(Qt::lightGray));
-    //fillColor = QColor(255, 255, 255, 200);
+    setCursor(Qt::ArrowCursor);
 }
+
 
 /////////////////////////
 
 void MyRectItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
                        QWidget *widget)
 {
-    painter->setPen(lineColor);
-    painter->setBrush(fillColor);
+    Q_UNUSED(option);
+    Q_UNUSED(widget);
+
+    painter->setPen(pen);
+    painter->setBrush(brush);
     painter->drawRect(boundingRect());
 
     drawBoarder(painter);
 }
 
 void MyEllipseItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
-                       QWidget *widget)
+                          QWidget *widget)
 {
-    painter->setPen(lineColor);
-    painter->setBrush(fillColor);
+    Q_UNUSED(option);
+    Q_UNUSED(widget);
+    painter->setPen(pen);
+    painter->setBrush(brush);
     painter->drawEllipse(boundingRect());
 
     drawBoarder(painter);
 }
 
-
-void MyLineItem::setLineStart(QPoint point)
+void MyRoundRectItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
+                            QWidget *widget)
 {
-    startPoint.setX(point.x());
-    startPoint.setY(point.y());
+    Q_UNUSED(option);
+    Q_UNUSED(widget);
+    painter->setPen(pen);
+    painter->setBrush(brush);
+    painter->drawRoundRect(boundingRect());
+
+    drawBoarder(painter);
 }
 
-void MyLineItem::setLineEnd(QPoint point)
+
+void MyLineItem::setLine(QPointF startP, QPointF endP)
 {
-    endPoint.setX(point.x());
-    endPoint.setY(point.y());
+    start.setX((startP.x() - boundingRect().left()) / boundingRect().width());
+    start.setY((startP.y() - boundingRect().top()) / boundingRect().height());
+    end.setX((endP.x() - boundingRect().left()) / boundingRect().width());
+    end.setY((endP.y() - boundingRect().top()) / boundingRect().height());
 }
 
 
 void MyLineItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
                        QWidget *widget)
 {
-    painter->setPen(lineColor);
-    painter->setBrush(fillColor);
-    painter->drawLine(startPoint, endPoint);
+    Q_UNUSED(option);
+    Q_UNUSED(widget);
+    painter->setPen(pen);
+    painter->setBrush(brush);
+    painter->drawLine(QPointF(start.x() * boundingRect().width() + boundingRect().left(),
+                              start.y() * boundingRect().height() + boundingRect().top()),
+                      QPointF(end.x() * boundingRect().width()+ boundingRect().left(),
+                              end.y() * boundingRect().height() + boundingRect().top()));
+    drawBoarder(painter);
+}
+
+QRectF MyPencilItem::boundingRect() const
+{
+    return path.boundingRect().normalized();
+}
+
+void MyPencilItem::setStart(QPointF point)
+{
+    path.moveTo(point);
+}
+
+void MyPencilItem::addPoint(QPointF point)
+{
+    path.lineTo(point);
+    update(boundingRect());
+}
+
+void MyPencilItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
+                         QWidget *widget)
+{
+    Q_UNUSED(option);
+    Q_UNUSED(widget);
+    QBrush newBrush = brush;
+    QColor newColor = brush.color();
+    newColor.setAlpha(0);
+    newBrush.setColor(newColor);
+
+    painter->setPen(pen);
+    painter->setBrush(newBrush);
+    painter->drawPath(path);
 
     drawBoarder(painter);
+}
+
+QRectF MyPolygonItem::boundingRect() const
+{
+    return polygon.boundingRect().normalized();
+}
+
+void MyPolygonItem::addPoint(QPointF point)
+{
+    polygon << point;
+    update(boundingRect());
+}
+
+void MyPolygonItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
+                          QWidget *widget)
+{
+    Q_UNUSED(option);
+    Q_UNUSED(widget);
+    painter->setPen(pen);
+    painter->setBrush(brush);
+    painter->drawPolygon(polygon);
+
+    drawBoarder(painter);
+}
+
+MyTextItem::MyTextItem(QFont font, QColor textColor)
+{
+    setFont(font);
+    setDefaultTextColor(textColor);
+    setFlag(QGraphicsItem::ItemIsMovable);
+    setFlag(QGraphicsItem::ItemIsFocusable);
+    setFlag(QGraphicsItem::ItemIsSelectable);
+    setTextInteractionFlags(Qt::TextEditorInteraction);
+    this->setFocus();
+}
+
+void MyTextItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
+{
+    setFocus();
+    if (textInteractionFlags() == Qt::NoTextInteraction)
+        setTextInteractionFlags(Qt::TextEditorInteraction);
+    QGraphicsTextItem::mouseDoubleClickEvent(event);
+}
+
+void MyTextItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
+{
+    setFocus();
+    setTextInteractionFlags(Qt::NoTextInteraction);
+    QGraphicsTextItem::mousePressEvent(event);
+}
+
+void MyTextItem::focusOutEvent(QFocusEvent *event)
+{
+    setTextInteractionFlags(Qt::NoTextInteraction);
+}
+
+void MyTextItem::keyPressEvent(QKeyEvent *event)
+{
+    switch(event->key())
+    {
+    case Qt::Key_Escape:
+        if (textInteractionFlags() == Qt::TextEditorInteraction)
+        {
+            setTextInteractionFlags(Qt::NoTextInteraction);
+            clearFocus();
+            break;
+        }
+        else
+        {
+            this->~MyTextItem();
+            return;
+        }
+    case Qt::Key_Up:  if (textInteractionFlags() == Qt::NoTextInteraction)this->moveBy(0, -2);break;
+    case Qt::Key_Down: if (textInteractionFlags() == Qt::NoTextInteraction) this->moveBy(0, 2);break;
+    case Qt::Key_Left: if (textInteractionFlags() == Qt::NoTextInteraction) this->moveBy(-2, 0);break;
+    case Qt::Key_Right: if (textInteractionFlags() == Qt::NoTextInteraction) this->moveBy(2, 0);break;
+    }
+    QGraphicsTextItem::keyPressEvent(event);
 }
