@@ -8,7 +8,7 @@
 #include <QImage>
 #include "myitem.h"
 #include "myscene.h"
-#include "myview.h"
+
 namespace Ui {
 class MainWindow;
 }
@@ -75,6 +75,8 @@ private slots:
 
     void on_actionHif_triggered();
 
+    void on_actionQuit_triggered();
+
 private:
     void updateBrushPreview();
     void updatePenPreview();
@@ -85,7 +87,6 @@ private:
     int fontSize = 10;
     Ui::MainWindow *ui;
     MyScene *scene, *brushPreScene, *penPreScene;
-    MyView *view;
     qreal scaleX = 1.0, scaleY = 1.0;
 
     void changeMouseMode(MOUSEMODE newMouseMode);

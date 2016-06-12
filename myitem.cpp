@@ -359,20 +359,19 @@ MyTextItem::MyTextItem(QFont font, QColor textColor)
 void MyTextItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
 {
     setFocus();
-    if (textInteractionFlags() == Qt::NoTextInteraction)
-        setTextInteractionFlags(Qt::TextEditorInteraction);
+    setTextInteractionFlags(Qt::TextEditorInteraction);
     QGraphicsTextItem::mouseDoubleClickEvent(event);
 }
 
 void MyTextItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
     setFocus();
-    setTextInteractionFlags(Qt::NoTextInteraction);
     QGraphicsTextItem::mousePressEvent(event);
 }
 
 void MyTextItem::focusOutEvent(QFocusEvent *event)
 {
+    Q_UNUSED(event);
     setTextInteractionFlags(Qt::NoTextInteraction);
 }
 

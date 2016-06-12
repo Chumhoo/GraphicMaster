@@ -1,5 +1,5 @@
 #include "mainwindow.h"
-#include "ui_mainwindow.h"
+#include "mainwindowUI.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -9,12 +9,21 @@ MainWindow::MainWindow(QWidget *parent) :
 
     setWindowTitle("图形大师 - 未命名");
     scene = new MyScene;//场景
-    scene->setSceneRect(-200, -150, 400, 300);
+    scene->setSceneRect(-400, -260, 800, 520);
     scene->setBackgroundBrush(QBrush(QColor(255, 255, 255), Qt::SolidPattern));
     brushPreScene = new MyScene;
     brushPreScene->setSceneRect(-40, 0, 80, 10);
     penPreScene = new MyScene;
     penPreScene->setSceneRect(-40, 0, 80, 10);
+
+    QLabel *permanent; //状态栏
+    QPalette pa;
+    pa.setColor(QPalette::WindowText, Qt::black);
+    permanent = new QLabel(this);
+    permanent->setText(tr("@Chumhoo Lee 515646122@qq.com"));
+    permanent->setTextFormat(Qt::RichText);
+    permanent->setPalette(pa);
+    ui->statusBar->addPermanentWidget(permanent);
 
     ui->graphicsView->setScene(scene);
     ui->penPreview->setScene(penPreScene);
@@ -30,14 +39,14 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->textButton->setCheckable(true);
     ui->scaleButton->setCheckable(true);
 
-    ui->SquareBtn->setIcon(QIcon(":/icons/rect.png"));
-    ui->DragBtn->setIcon(QIcon(":/icons/hand.png"));
-    ui->EllipseButton->setIcon(QIcon(":/icons/ellipse.png"));
+    ui->SquareBtn->setIcon(QIcon(":/icons/rectangle.png"));
+    ui->DragBtn->setIcon(QIcon(":/icons/grab.png"));
+    ui->EllipseButton->setIcon(QIcon(":/icons/circle.png"));
     ui->lineButton->setIcon(QIcon(":/icons/line.png"));
-    ui->roundSquareButton->setIcon(QIcon(":/icons/roundSquare.png"));
+    ui->roundSquareButton->setIcon(QIcon(":/icons/rounded.png"));
     ui->polygonButton->setIcon(QIcon(":/icons/polygon.png"));
     ui->textButton->setIcon(QIcon(":/icons/text.png"));
-    ui->scaleButton->setIcon(QIcon(":/icons/scaler.png"));
+    ui->scaleButton->setIcon(QIcon(":/icons/magnifier.png"));
     ui->pencilButton->setIcon(QIcon(":/icons/pencil.png"));
 
     updateBrushPreview();
@@ -405,14 +414,14 @@ void MainWindow::on_actionInput_triggered()
 
 void MainWindow::on_actionPng_triggered()
 {
-    QImage image(QSize(1280,960), QImage::Format_RGB32);
+    QImage image(QSize(scene->width(),scene->height()), QImage::Format_RGB32);
     QPainter painter(&image);
 
     scene->clearFocus();
     scene->clearSelection();
     scene->render(&painter);   //关键函数
 
-    QString fileName = QFileDialog::getSaveFileName(this, tr("导出为图片"), ".png");
+    QString fileName = QFileDialog::getSaveFileName(this, tr("导出为图片"), "new.png");
     if (fileName.isEmpty())
         return;
     else
@@ -427,14 +436,14 @@ void MainWindow::on_actionPng_triggered()
 
 void MainWindow::on_actionJpg_triggered()
 {
-    QImage image(QSize(1280,960), QImage::Format_RGB32);
+    QImage image(QSize(scene->width(),scene->height()), QImage::Format_RGB32);
     QPainter painter(&image);
 
     scene->clearFocus();
     scene->clearSelection();
     scene->render(&painter);   //关键函数
 
-    QString fileName = QFileDialog::getSaveFileName(this, tr("导出为图片"), ".jpg");
+    QString fileName = QFileDialog::getSaveFileName(this, tr("导出为图片"), "new.jpg");
     if (fileName.isEmpty())
         return;
     else
@@ -449,14 +458,14 @@ void MainWindow::on_actionJpg_triggered()
 
 void MainWindow::on_actionHif_triggered()
 {
-    QImage image(QSize(1280,960), QImage::Format_RGB32);
+    QImage image(QSize(scene->width(),scene->height()), QImage::Format_RGB32);
     QPainter painter(&image);
 
     scene->clearFocus();
     scene->clearSelection();
     scene->render(&painter);   //关键函数
 
-    QString fileName = QFileDialog::getSaveFileName(this, tr("导出为图片"), ".gif");
+    QString fileName = QFileDialog::getSaveFileName(this, tr("导出为图片"), "new.gif");
     if (fileName.isEmpty())
         return;
     else
@@ -467,4 +476,9 @@ void MainWindow::on_actionHif_triggered()
             QMessageBox::critical(this, "错误", "缺失后缀名!", "确定");
         setWindowTitle("图形大师 - " + fileName);
     }
+}
+
+void MainWindow::on_actionQuit_triggered()
+{
+    this->close();
 }

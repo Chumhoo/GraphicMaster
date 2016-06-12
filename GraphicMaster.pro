@@ -15,18 +15,14 @@ TEMPLATE = app
 SOURCES += main.cpp\
         mainwindow.cpp \
     myitem.cpp \
-    myscene.cpp \
-    myview.cpp \
-    newdialog.cpp
+    myscene.cpp
 
 HEADERS  += mainwindow.h \
     myitem.h \
     myscene.h \
-    myview.h \
-    newdialog.h
+    mainwindowUI.h
 
-FORMS    += mainwindow.ui \
-    newdialog.ui
+FORMS    += mainwindow.ui
 
 RESOURCES += \
     icons.qrc
