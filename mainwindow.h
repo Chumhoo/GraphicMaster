@@ -26,55 +26,38 @@ public:
     ~MainWindow();
 
 private slots:
+
+    void keyPressEvent(QKeyEvent *event);
+    void wheelEvent(QWheelEvent *event);
+
     void on_DragBtn_clicked();
     void on_SquareBtn_clicked();
     void on_EllipseButton_clicked();
-    void keyPressEvent(QKeyEvent *event);
     void on_lineButton_clicked();
     void on_roundSquareButton_clicked();
     void on_polygonButton_clicked();
     void on_textButton_clicked();
     void on_pencilButton_clicked();
     void on_scaleButton_clicked();
-    void wheelEvent(QWheelEvent *event);
     void on_BrushColorButton_2_clicked();
-
     void on_PenColorButton_clicked();
-
     void on_penStyle_activated(int index);
-
     void on_comboBox_activated(int index);
-
     void on_penThickness_sliderMoved(int position);
-
     void on_brushAlpha_sliderMoved(int position);
-
     void on_penAlpha_sliderMoved(int position);
-
     void on_textColor_clicked();
-
     void on_font_currentFontChanged(const QFont &f);
-
     void on_textSize_sliderMoved(int position);
-
     void on_clearButton_clicked();
-
     void on_moveToTop_clicked();
-
     void on_moveToBottom_clicked();
-
     void on_actionNew_triggered();
-
     void on_actionAbout_triggered();
-
     void on_actionInput_triggered();
-
     void on_actionPng_triggered();
-
     void on_actionJpg_triggered();
-
     void on_actionHif_triggered();
-
     void on_actionQuit_triggered();
 
 private:

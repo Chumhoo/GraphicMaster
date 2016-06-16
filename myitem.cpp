@@ -1,16 +1,16 @@
 #include "myitem.h"
-#include <QVariant>
 
 MyItem::MyItem(QBrush newBrush, QPen newPen) : brush(newBrush), pen(newPen)
 {
     clearFocus();
-    setAcceptDrops(true);  //设置接收拖放!!!
+    setAcceptDrops(true);
 
-    setFlag(QGraphicsItem::ItemIsSelectable);  //添加本性质则可同时选择多项
+    setFlag(QGraphicsItem::ItemIsSelectable);
     setFlag(QGraphicsItem::ItemIsFocusable);
     setFlag(QGraphicsItem::ItemIsMovable);
     setAcceptHoverEvents(true);
 
+    //random select a color for the bound
     selectColor = QColor(qrand() % 256, qrand() % 256, qrand() % 256);
     rect = rect.normalized();
 }
@@ -23,18 +23,20 @@ QRectF MyItem::boundingRect() const
 void MyItem::setBoundingRect(QRectF newRect)
 {
     rect = newRect;
-    //通知场景scene即将发生的变化，这样场景可以刷新item的位置下标。否则，场景将不会察觉到item的变化，结果也未知
+    //inform the scene that the boundingRect is going to be changed, or there will be residual in the scene
     prepareGeometryChange();
     update(boundingRect());
 }
 
 void MyItem::setBrush(const QBrush newBrush)
 {
+    //set the brush
     brush = newBrush;
 }
 
 void MyItem::setPen(const QPen newPen)
 {
+    //set the pen
     pen = newPen;
 }
 
@@ -50,10 +52,9 @@ void MyItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
 
 void MyItem::drawBoarder(QPainter *painter)
 {
-    if(hasFocus() || isSelected()) {
-        //        QPixmap pix;
-        //        pix.load(":/icons/boarder.png");
-        //        painter->drawPixmap(boundingRect().left(), boundingRect().top(), boundingRect().width(), boundingRect().height(), pix);
+    if(hasFocus() || isSelected())
+    {
+        //draw the boarder rectangle
         painter->setPen(QPen(selectColor, 2, Qt::DashLine));
         painter->setBrush(QColor(0, 0, 255, 10));
         painter->drawRect(boundingRect().x(), boundingRect().y(), boundingRect().width(), boundingRect().height());
@@ -75,79 +76,92 @@ void MyItem::drawBoarder(QPainter *painter)
 void MyItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
     setFocus();
+    //pass the mouse event
     QGraphicsItem::mousePressEvent(event);
 }
 
 
 void MyItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
-        if (resizeDir == EMPTY)
+    if (resizeDir == EMPTY)
+    {
+        //move the item
+        setFlag(ItemIsMovable, true);
+    }
+    else
+    {
+        setFlag(ItemIsMovable, false);
+        if (resizeDir == LEFT)
         {
-            setFlag(ItemIsMovable, true);
+            //resize left boarder
+            if (event->scenePos().x() < this->x() + rect.right())
+                rect.setLeft(event->scenePos().x() - this->x());
+            //change resize direction
+            else resizeDir = RIGHT;
+            setBoundingRect(rect);
         }
-        else
+        else if (resizeDir == RIGHT)
         {
-            setFlag(ItemIsMovable, false);
-            if (resizeDir == LEFT)
-            {
-                if (event->scenePos().x() < this->x() + rect.right()) rect.setLeft(event->scenePos().x() - this->x());
-                else resizeDir = RIGHT;
-                setBoundingRect(rect);
-            }
-            else if (resizeDir == RIGHT)
-            {
-                if (event->scenePos().x() > this->x() + rect.left()) rect.setRight(event->scenePos().x() - this->x());
-                else resizeDir = LEFT;
-                setBoundingRect(rect);
-            }
-            else if (resizeDir == UP)
-            {
-                if (event->scenePos().y() < this->y() + rect.bottom()) rect.setTop(event->scenePos().y() - this->y());
-                else resizeDir = DOWN;
-                setBoundingRect(rect);
-            }
-            else if (resizeDir == DOWN)
-            {
-                if (event->scenePos().y() > this->y() + rect.top()) rect.setBottom(event->scenePos().y() - this->y());
-                else resizeDir = UP;
-                setBoundingRect(rect);
-            }
-            else if (resizeDir == LEFTTOP)
-            {
-                if (event->scenePos().x() < this->x() + rect.right())
-                    rect.setTopLeft(QPointF(event->scenePos().x() - this->x(), event->scenePos().y() - this->y()));
-                else resizeDir = RIGHTBOTTOM;
-                setBoundingRect(rect);
-            }
-            else if (resizeDir == RIGHTBOTTOM)
-            {
-                if (event->scenePos().x() > this->x() + rect.left())
-                    rect.setBottomRight(QPointF(event->scenePos().x() - this->x(), event->scenePos().y() - this->y()));
-                else resizeDir = LEFTTOP;
-                setBoundingRect(rect);
-            }
-            else if (resizeDir == LEFTBOTTOM)
-            {
-                if (event->scenePos().x() < this->x() + rect.right())
-                    rect.setBottomLeft(QPointF(event->scenePos().x() - this->x(), event->scenePos().y() - this->y()));
-                else resizeDir = RIGHTTOP;
-                setBoundingRect(rect);
-            }
-            else // if (resizeDir == RIGHTTOP)
-            {
-                if (event->scenePos().x() > this->x() + rect.left())
-                    rect.setTopRight(QPointF(event->scenePos().x() - this->x(), event->scenePos().y() - this->y()));
-                else resizeDir = LEFTBOTTOM;
-                setBoundingRect(rect);
-            }
+            //resize right boarder
+            if (event->scenePos().x() > this->x() + rect.left())
+                rect.setRight(event->scenePos().x() - this->x());
+            //change resize direction
+            else resizeDir = LEFT;
+            setBoundingRect(rect);
         }
+        else if (resizeDir == UP)
+        {
+            //resize top boarder
+            if (event->scenePos().y() < this->y() + rect.bottom())
+                rect.setTop(event->scenePos().y() - this->y());
+            //change resize direction
+            else resizeDir = DOWN;
+            setBoundingRect(rect);
+        }
+        else if (resizeDir == DOWN)
+        {
+            //resize bottom boarder
+            if (event->scenePos().y() > this->y() + rect.top())
+                rect.setBottom(event->scenePos().y() - this->y());
+            //change resize direction
+            else resizeDir = UP;
+            setBoundingRect(rect);
+        }
+        else if (resizeDir == LEFTTOP)
+        {
+            //resize the left top point
+            if (event->scenePos().x() < this->x() + rect.right())
+                rect.setTopLeft(QPointF(event->scenePos().x() - this->x(), event->scenePos().y() - this->y()));
+            //change resize direction
+            else resizeDir = RIGHTBOTTOM;
+            setBoundingRect(rect);
+        }
+        else if (resizeDir == RIGHTBOTTOM)
+        {
+            //resize the right bottom point
+            if (event->scenePos().x() > this->x() + rect.left())
+                rect.setBottomRight(QPointF(event->scenePos().x() - this->x(), event->scenePos().y() - this->y()));
+            else resizeDir = LEFTTOP;
+            setBoundingRect(rect);
+        }
+        else if (resizeDir == LEFTBOTTOM)
+        {
+            //resize the left bottom point
+            if (event->scenePos().x() < this->x() + rect.right())
+                rect.setBottomLeft(QPointF(event->scenePos().x() - this->x(), event->scenePos().y() - this->y()));
+            else resizeDir = RIGHTTOP;
+            setBoundingRect(rect);
+        }
+        else // if (resizeDir == RIGHTTOP)
+        {
+            // resize the right top point
+            if (event->scenePos().x() > this->x() + rect.left())
+                rect.setTopRight(QPointF(event->scenePos().x() - this->x(), event->scenePos().y() - this->y()));
+            else resizeDir = LEFTBOTTOM;
+            setBoundingRect(rect);
+        }
+    }
     QGraphicsItem::mouseMoveEvent(event);
-}
-
-void MyItem::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
-{
-    Q_UNUSED(event);
-    hovering = true;
 }
 
 void MyItem::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
@@ -155,13 +169,17 @@ void MyItem::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
     if (hasFocus())
     {
         qreal mouseX, mouseY, left, right, top, bottom;
+        //configure the coordinates of mouse
         mouseX = event->scenePos().x();
         mouseY = event->scenePos().y();
+
+        //set left, right, top, bottom position
         left = this->x() + boundingRect().left();
         right = this->x() + boundingRect().right();
         top = this->y() + boundingRect().top();
         bottom = this->y() + boundingRect().bottom();
 
+        //change cursor type and resize mode
         if (mouseX > left - 5 && mouseX < left + 5)
         {
             if (mouseY > top - 5 && mouseY < top + 5)
@@ -215,16 +233,6 @@ void MyItem::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
         }
     }
 }
-
-void MyItem::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
-{
-    Q_UNUSED(event);
-    //qDebug() << event->type();
-    hovering = false;
-    resizeDir = EMPTY;
-    setCursor(Qt::ArrowCursor);
-}
-
 
 /////////////////////////
 

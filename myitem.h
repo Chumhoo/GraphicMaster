@@ -9,6 +9,7 @@
 #include <QVariant>
 #include <QColor>
 #include <QMenu>
+#include <QVariant>
 
 
 enum resizeDirection{EMPTY, LEFT, RIGHT, UP, DOWN, LEFTTOP, RIGHTTOP, LEFTBOTTOM, RIGHTBOTTOM};
@@ -32,9 +33,7 @@ public:
 protected:
     void mousePressEvent(QGraphicsSceneMouseEvent *event);
     void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
-    void hoverEnterEvent(QGraphicsSceneHoverEvent *event);
     void hoverMoveEvent(QGraphicsSceneHoverEvent *event);
-    void hoverLeaveEvent(QGraphicsSceneHoverEvent *event);
 
     QColor selectColor;
     QRectF rect;
@@ -42,7 +41,7 @@ protected:
     QPen pen;
 
 private:
-    bool hovering = false;
+
 };
 
 class MyRectItem : public MyItem
